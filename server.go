@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -20,41 +19,44 @@ func NewRemoteMap() *RemoteMap {
 	}
 }
 
-func (m *RemoteMap) Update(key string, value int) {
+func (m *RemoteMap) Update(key string, value int) bool {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	if lastValue, ok := m.data[key]; ok {
 		m.data[key] = value
 		fmt.Printf("Par atualizado no dicionário: (%s:%d) -> (%s:%d)\n", key, lastValue, key, value)
+		return false
 	}else{
 		m.data[key] = value
 		fmt.Printf("Novo par cadastrado no dicionário: (%s:%d)\n", key, value)
+		return true
 	}
 }
 
-func (m *RemoteMap) Get(key string) (int, error) {
+func (m *RemoteMap) Get(key string) int {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	value, ok := m.data[key]
 	if ok {
 		fmt.Printf("Consulta no dicionário a partir da chave '%s': %d\n", key, value)
-		return value, nil
+		return value
 	}
-	return -1, errors.New("Não existe esta chave no dicionário!")
+	fmt.Printf("Consulta no dicionário a partir da chave '%s': não existe!\n", key)
+	return -1
 }
 
-func (m *RemoteMap) Remove(key string) error {
+func (m *RemoteMap) Remove(key string) bool {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	if value, ok := m.data[key]; ok {
 		fmt.Printf("Par (%s:%d) foi removido do dicionário!\n", key, value)
 		delete(m.data, key)
-		return nil
-	}
-	return errors.New("Chave fornecida não existe no dicionário!")
+		return true
+	}	
+	return false
 }
 
 func main() {

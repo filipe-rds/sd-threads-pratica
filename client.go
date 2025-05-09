@@ -10,9 +10,9 @@ import (
 )
 
 type RemoteData struct {
-	Update func(string, int)
-	Get    func(string) (int, error)
-	Remove func(string) error
+	Update func(string, int) bool
+	Get    func(string) int
+	Remove func(string) bool
 }
 
 func clearScreen() {
@@ -69,8 +69,13 @@ func main() {
 				fmt.Println("Erro ao ler o valor.")
 				continue
 			}
-			rm.Update(key, value)
-			fmt.Println("Par inserido com sucesso!")
+			newPair := rm.Update(key, value)
+			if newPair {
+				fmt.Println("Par inserido com sucesso!")
+			}else{
+				fmt.Println("Par atualizado com sucesso!")
+			}
+			
 
 		case 2:
 			// Operação de Get
@@ -81,11 +86,11 @@ func main() {
 				fmt.Println("Erro ao ler a chave.")
 				continue
 			}
-			value, err := rm.Get(key)
-			if err != nil {
-				fmt.Println(err)
-			} else {
+			value := rm.Get(key)
+			if value != -1 {
 				fmt.Printf("Valor da chave '%s': %d\n", key, value)
+			} else {
+				fmt.Printf("Não existe esta chave no dicionário!\n")
 			}
 
 		case 3:
@@ -97,11 +102,11 @@ func main() {
 				fmt.Println("Erro ao ler a chave.")
 				continue
 			}
-			err = rm.Remove(key)
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				fmt.Println("Chave removida com sucesso!")
+			removed := rm.Remove(key)
+			if removed {
+				fmt.Println("Par removido do dicionário com sucesso!")
+			}else{
+				fmt.Println("Não existe nenhum par com esta chave no dicionário!")
 			}
 
 		case 4:
